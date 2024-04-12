@@ -54,25 +54,22 @@
             return result;
         } 
 
-        public List<Point>? GetPath(Point start)
+        private IEnumerable<List<Point>> GetPath(Point start)
         {
             var queue = new Queue<Point>();
             var paths = new Dictionary<Point, Point?>();
             queue.Enqueue(start);
             paths[start] = null;
-
             while (queue.Count != 0)
             {
                 var point = queue.Dequeue();
                 if (_targets.Contains(point))
-                    return GetPath(point, paths);
+                    yield return GetPath(point, paths);
 
                 foreach (var neighbour in GetNeighbours(point))
                     if (paths.TryAdd(neighbour, point))
                         queue.Enqueue(neighbour);
             }
-
-            return null;
         }
 
         private void Move(Point point)
@@ -83,7 +80,7 @@
 
         public MoveResult MakeMove()
         {
-            var path = GetPath(field.GetEnemyPosition());
+            var path = GetPath(field.GetEnemyPosition()).MinBy(p => p.Count);
             if (path is null)
                 return MoveResult.NoPoints;
             var move = path[1];
