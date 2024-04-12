@@ -80,7 +80,7 @@
 
         public MoveResult MakeMove()
         {
-            var path = GetPath(field.GetEnemyPosition()).MinBy(p => p.Count);
+            var path = GetPath(field.GetEnemyPosition()).FirstOrDefault();
             if (path is null)
                 return MoveResult.NoPoints;
             var move = path[1];
