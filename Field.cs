@@ -3,15 +3,15 @@
     internal enum FieldElements
     {
         Void,
-        Lose,
         Empty,
         Enemy,
         Obstacle,
+        DoubleMove
     }
 
     internal class Field
     {
-        public const int FieldSize = 9;
+        public const int FieldSize = 11;
 
         private readonly (int x, int y, FieldElements element)[] _templatePositions =
         [
@@ -19,39 +19,59 @@
             (FieldSize / 2, FieldSize / 2, FieldElements.Enemy),
     
             // Corner and border positions
-            (0, 0, FieldElements.Void),
-            (0, 1, FieldElements.Void),
-            (1, 0, FieldElements.Void),
-            (1, 1, FieldElements.Lose),
+            
+            (1, 1, FieldElements.Void),
+            (1, 2, FieldElements.Void),
+            (2, 1, FieldElements.Void),
 
-            (FieldSize - 1, 0, FieldElements.Void),
-            (FieldSize - 1, 1, FieldElements.Void),
-            (FieldSize - 2, 0, FieldElements.Void),
-            (FieldSize - 2, 1, FieldElements.Lose),
+            
+            (FieldSize - 2, 1, FieldElements.Void),
+            (FieldSize - 2, 2, FieldElements.Void),
+            (FieldSize - 3, 1, FieldElements.Void),
 
-            (0, FieldSize - 1, FieldElements.Void),
-            (1, FieldSize - 1, FieldElements.Void),
-            (0, FieldSize - 2, FieldElements.Void),
-            (1, FieldSize - 2, FieldElements.Lose),
+            (1, FieldSize - 2, FieldElements.Void),
+            (2, FieldSize - 2, FieldElements.Void),
+            (1, FieldSize - 3, FieldElements.Void),
 
-            (FieldSize - 1, FieldSize - 1, FieldElements.Void),
-            (FieldSize - 2, FieldSize - 1, FieldElements.Void),
-            (FieldSize - 1, FieldSize - 2, FieldElements.Void),
-            (FieldSize - 2, FieldSize - 2, FieldElements.Lose)
+            (FieldSize - 2, FieldSize - 2, FieldElements.Void),
+            (FieldSize - 3, FieldSize - 2, FieldElements.Void),
+            (FieldSize - 2, FieldSize - 3, FieldElements.Void),
         ];
 
         private readonly FieldElements[,] _elements = new FieldElements[FieldSize, FieldSize];
 
         public FieldElements this[int x, int y] => _elements[x, y];
 
-        public Field()
+        public static Field GetSquaredField()
         {
+            var result = new Field();
             for (var i = 0; i < FieldSize; i++)
             for (var j = 0; j < FieldSize; j++)
             {
+                result._elements[i, j] = FieldElements.Empty;
+                    if (i == 0 || j == 0 || i == FieldSize - 1 || j == FieldSize - 1)
+                        result._elements[i, j] = FieldElements.Void;
+            }
+            result._elements[FieldSize / 2, FieldSize / 2] = FieldElements.Enemy;
+            return result;
+        }
+
+
+        public Field()
+        {
+            var random = new Random();
+            for (var i = 0; i < FieldSize; i++)
+            for (var j = 0; j < FieldSize; j++)
+            {
+                var randomNum = random.Next(100);
                 _elements[i, j] = FieldElements.Empty;
+                if (randomNum < 5)
+                    _elements[i, j] = FieldElements.Obstacle;
+                else if (randomNum is > 5 and < 10)
+                    _elements[i, j] = FieldElements.DoubleMove;
+                
                 if (i == 0 || j == 0 || i == FieldSize - 1 || j == FieldSize - 1)
-                    _elements[i, j] = FieldElements.Lose;
+                    _elements[i, j] = FieldElements.Void;
             }
 
             foreach (var (x, y, element) in _templatePositions)
@@ -66,6 +86,18 @@
                 if (_elements[i, j] == FieldElements.Void)
                     yield return new Point(i, j);
             }
+        }
+
+        public List<Point> GetEmptyPoints()
+        {
+            var result = new List<Point>();
+            for (var i = 0; i < FieldSize; i++)
+            for (var j = 0; j < FieldSize; j++)
+            {
+                if (_elements[i, j] == FieldElements.Empty)
+                    result.Add(new Point(i, j));
+            }
+            return result;
         }
 
         public static bool InBounds(Point point) =>

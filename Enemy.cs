@@ -1,6 +1,6 @@
 ﻿namespace ConfinementDemo
 {
-    internal class Enemy(Field field)
+    internal class Enemy(Field field) : IEnemy
     {
         public enum MoveResult
         {
@@ -9,29 +9,19 @@
             Win
         }
 
-        private readonly HashSet<Point> _targets = field.GetVoidPoints().ToHashSet();
-
-        private static IEnumerable<Point> GetRandomDeltas()
+        private static IEnumerable<Point> GetDeltas()
         {
-            var deltas = new List<Point>();
             for (var dy = -1; dy <= 1; dy++)
             for (var dx = -1; dx <= 1; dx++)
             {
                 if (dx != 0 && dy != 0) continue;
-                deltas.Add(new Point(dx, dy));
+                yield return new Point(dx, dy);
             }
-            var random = new Random();
-            while (deltas.Count != 0)
-            {
-                var randomIndex = random.Next(deltas.Count);
-                yield return deltas[randomIndex];
-                deltas.RemoveAt(randomIndex);
-            }
-                
         }
 
+
         private IEnumerable<Point> GetNeighbours(Point point) =>
-            GetRandomDeltas()
+            GetDeltas()
                 .Select(delta => delta + point)
                 .Where(neighbour => 
                     Field.InBounds(neighbour) &&
@@ -57,13 +47,14 @@
         private IEnumerable<List<Point>> GetPath(Point start)
         {
             var queue = new Queue<Point>();
+            var targets = field.GetVoidPoints().ToHashSet();
             var paths = new Dictionary<Point, Point?>();
             queue.Enqueue(start);
             paths[start] = null;
             while (queue.Count != 0)
             {
                 var point = queue.Dequeue();
-                if (_targets.Contains(point))
+                if (targets.Contains(point))
                     yield return GetPath(point, paths);
 
                 foreach (var neighbour in GetNeighbours(point))
@@ -86,7 +77,7 @@
             var move = path[1];
             var result = field[move.X, move.Y];
             Move(move);
-            return result == FieldElements.Lose ? MoveResult.Win : MoveResult.Move;
+            return result == FieldElements.Void ? MoveResult.Win : MoveResult.Move;
         }
     }
 }

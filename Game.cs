@@ -2,7 +2,7 @@
 {
     internal class Game
     {
-        private readonly Enemy _enemy;
+        private readonly IEnemy _enemy;
         private readonly Field _field;
         private readonly Player _player;
 
@@ -10,7 +10,7 @@
         {
             _field = new Field();
             _player = new Player(_field);
-            _enemy = new Enemy(_field);
+            _enemy = new SmartEnemy(_field);
         }
 
         public void Start()

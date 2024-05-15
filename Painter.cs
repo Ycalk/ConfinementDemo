@@ -51,11 +51,11 @@ namespace ConfinementDemo
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.Write("\u00b0" + " ");
                         break;
-                    case FieldElements.Lose:
+                    case FieldElements.DoubleMove:
                         Console.SetCursorPosition(leftIndent + i * 2,
                             topIndent + j);
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write("·" + " ");
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write("0" + " ");
                         break;
                     }
                 Console.BackgroundColor = ConsoleColor.Black;
